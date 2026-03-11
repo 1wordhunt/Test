@@ -3,67 +3,69 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kelime Projesi v3.5</title>
+    <title>Kelime Projesi v3.6</title>
     <style>
         :root {
             --spot-black: #121212;
-            --spot-grey: #282828;
-            --spot-green: #1DB954;
+            --spot-grey: #181818;
+            --inner-grey: #282828;
         }
 
         body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; margin: 0; padding: 20px; }
         
+        /* Ana Liste Tasarımı */
         .list-container { max-width: 500px; margin: 0 auto; display: flex; flex-direction: column; gap: 12px; }
         .word-item { 
             background: white; padding: 18px; border-radius: 15px; cursor: pointer;
             display: flex; justify-content: space-between; align-items: center;
             box-shadow: 0 4px 10px rgba(0,0,0,0.05); transition: 0.3s;
         }
+        .listen-icon { font-size: 20px; color: #1DB954; padding: 5px; cursor: pointer; }
 
+        /* Detay Sayfası Overlay */
         #page-overlay { 
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-            background: rgba(0,0,0,0.9); z-index: 1000; justify-content: center; align-items: center;
-            backdrop-filter: blur(10px);
+            background: var(--spot-black); z-index: 1000; justify-content: center; align-items: center;
+            flex-direction: column;
         }
 
-        .content-container { width: 90%; max-width: 400px; display: flex; flex-direction: column; gap: 15px; }
+        .content-container { width: 90%; max-width: 400px; display: flex; flex-direction: column; gap: 15px; position: relative; }
 
-        /* Üst: Resim ve Film Yan Yana */
+        /* Üst Bölüm: Kelime ve Medya */
+        .word-header { color: white; text-align: center; margin-bottom: 10px; }
+        .word-header h1 { margin: 0; font-size: 32px; font-weight: 800; display: inline-block; vertical-align: middle; }
+        .word-header span { font-size: 18px; opacity: 0.6; margin-left: 10px; }
+        .header-listen { background: none; border: none; color: white; font-size: 24px; cursor: pointer; margin-left: 10px; vertical-align: middle; }
+
         .media-row { display: flex; gap: 10px; width: 100%; }
         .media-box { 
             flex: 1; height: 150px; background: white; border-radius: 20px; 
             overflow: hidden; display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
         }
         .media-box img { width: 100%; height: 100%; object-fit: cover; }
 
-        /* Alt: Spotify Dark Player */
+        /* Alt Bölüm: Spotify Dark Player */
         .spotify-card { 
-            background: var(--spot-black); border-radius: 35px; padding: 30px; 
-            position: relative; box-shadow: 0 20px 50px rgba(0,0,0,0.5);
-            color: white;
+            background: var(--spot-grey); border-radius: 35px; padding: 30px; 
+            color: white; box-shadow: 0 20px 50px rgba(0,0,0,0.5);
         }
 
-        /* Kelime İsmi Alanı (Resim kaldırıldı) */
-        .word-display-area { 
-            height: 180px; display: flex; flex-direction: column; align-items: center; 
-            justify-content: center; border-radius: 20px; background: var(--spot-grey);
-            margin-bottom: 25px; text-align: center;
+        /* İçi Boş Şarkı Kartı */
+        .empty-player-box { 
+            height: 180px; background: var(--inner-grey); border-radius: 20px; margin-bottom: 25px;
         }
-        #playerWordTitle { font-size: 40px; font-weight: 900; margin: 0; letter-spacing: -1px; }
-        #playerWordTurkish { font-size: 20px; opacity: 0.6; margin-top: 5px; }
 
         .progress-area { width: 100%; position: relative; margin: 20px 0; }
         .bar-bg { width: 100%; height: 4px; background: #4f4f4f; border-radius: 2px; }
-        .bar-fill { width: 45%; height: 4px; background: white; border-radius: 2px; }
-        .dot { width: 12px; height: 12px; background: white; border-radius: 50%; position: absolute; left: 45%; top: -4px; }
-        .plus-icon { position: absolute; right: 0; top: -35px; font-size: 24px; cursor: pointer; color: white; }
+        .bar-fill { width: 60%; height: 4px; background: white; border-radius: 2px; }
+        .dot { width: 12px; height: 12px; background: white; border-radius: 50%; position: absolute; left: 60%; top: -4px; }
+        .plus-icon { position: absolute; right: 0; top: -35px; font-size: 24px; color: white; }
 
-        .btns { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; }
-        .btn-small { background: none; border: none; font-size: 22px; cursor: pointer; color: #b3b3b3; }
+        .btns { display: flex; justify-content: space-between; align-items: center; }
+        .btn-small { background: none; border: none; font-size: 22px; color: #b3b3b3; cursor: pointer; }
         .play-main { background: white; color: black; width: 65px; height: 65px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 28px; border: none; cursor: pointer; }
 
-        .close-x { position: absolute; top: 15px; right: 20px; font-size: 22px; cursor: pointer; color: #b3b3b3; }
+        .close-x { position: absolute; top: 15px; right: 15px; font-size: 24px; cursor: pointer; color: #b3b3b3; z-index: 1001; }
     </style>
 </head>
 <body>
@@ -72,20 +74,22 @@
     <div class="list-container" id="list"></div>
 
     <div id="page-overlay">
+        <div class="close-x" onclick="closePage()">✕</div>
         <div class="content-container">
             
+            <div class="word-header">
+                <h1 id="topWord">WORD</h1>
+                <span id="topTr">(Türkçe)</span>
+                <button class="header-listen" onclick="speakAgain()">🔊</button>
+            </div>
+
             <div class="media-row">
-                <div class="media-box" id="resimKutusu">Resim</div>
-                <div class="media-box" id="filmKutusu">Film</div>
+                <div class="media-box" id="resimKutusu"></div>
+                <div class="media-box" id="filmKutusu"></div>
             </div>
 
             <div class="spotify-card">
-                <div class="close-x" onclick="closePage()">✕</div>
-                
-                <div class="word-display-area">
-                    <h1 id="playerWordTitle">WORD</h1>
-                    <div id="playerWordTurkish">Türkçe Karşılığı</div>
-                </div>
+                <div class="empty-player-box"></div>
 
                 <div class="progress-area">
                     <div class="plus-icon">⊕</div>
@@ -112,6 +116,7 @@
             {en:"year", tr:"yıl", img:"https://i.ibb.co/Pz3tWTSw/MG-20260310-WA0035.jpg"},
             {en:"people", tr:"insanlar", img:"https://i.ibb.co/8g9cT4GM/MG-20260310-WA0036.jpg"},
             {en:"way", tr:"yol", img:"https://i.ibb.co/chCL2m8m/MG-20260310-WA0037.jpg"},
+            {en:"man", tr:"adam", img:"https://i.ibb.co/xtmpJsr7/MG-20260310-WA0039.jpg"},
             {en:"different", tr:"farklı", img:"https://i.ibb.co/6RY23yxs/MG-20260310-WA0028.jpg"}
         ];
 
@@ -119,18 +124,19 @@
         wordData.forEach((item, index) => {
             let div = document.createElement('div');
             div.className = 'word-item';
-            div.innerHTML = `<span><b>${index + 1}.</b> ${item.en}</span> <span>🔊</span>`;
-            div.onclick = () => openPage(item);
+            div.innerHTML = `
+                <span onclick="openPage(${JSON.stringify(item).replace(/"/g, '&quot;')})"><b>${index + 1}.</b> ${item.en}</span> 
+                <span class="listen-icon" onclick="event.stopPropagation(); speak('${item.en}')">🔊</span>`;
             listDiv.appendChild(div);
         });
 
         function openPage(item) {
             currentWord = item.en;
-            document.getElementById('playerWordTitle').innerText = item.en.toUpperCase();
-            document.getElementById('playerWordTurkish').innerText = item.tr;
+            document.getElementById('topWord').innerText = item.en.toUpperCase();
+            document.getElementById('topTr').innerText = `(${item.tr})`;
             
             document.getElementById('resimKutusu').innerHTML = `<img src="${item.img}">`;
-            document.getElementById('filmKutusu').innerHTML = `<p style="font-size:12px;color:#999">Hoca film atcak</p>`;
+            document.getElementById('filmKutusu').innerHTML = `<p style="font-size:12px;color:#999;text-align:center">Hoca film atcak</p>`;
             
             document.getElementById('page-overlay').style.display = 'flex';
             speak(item.en);
