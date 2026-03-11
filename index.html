@@ -16,7 +16,6 @@
         body { font-family: Arial, sans-serif; background-color: var(--bg-color); margin: 0; padding: 20px; color: var(--main-text); }
         h1 { text-align: center; color: var(--main-text); margin-bottom: 30px; }
 
-        /* Kelime Listesi Tasarımı */
         .list-container { max-width: 600px; margin: 0 auto; display: flex; flex-direction: column; gap: 8px; }
         .word-item { 
             background: white; padding: 18px; border: 1px solid #ddd; border-radius: 8px;
@@ -31,12 +30,8 @@
             background: #3498db; color: white; border: none; border-radius: 50%;
             width: 32px; height: 32px; margin-right: 15px; cursor: pointer;
             font-size: 15px; line-height: 32px; text-align: center; display: inline-block;
-            transition: background 0.2s;
         }
-        .speaker-btn:hover { background: #2980b9; }
-        .tr-word { color: var(--sub-text); font-size: 14px; margin-left: 10px; font-style: italic; }
 
-        /* Animasyonlu Tam Ekran Sayfa */
         #page-overlay { 
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
             background: rgba(0,0,0,0.7); z-index: 1000; overflow-y: auto;
@@ -56,57 +51,27 @@
         #page-overlay.active { display: flex; }
         #page-overlay.active .page-content { transform: scale(1); opacity: 1; }
 
-        /* Yeni İçerik Tasarımı (Resim Sol, Film Sağ) */
-        .content-split {
-            display: flex; gap: 20px; justify-content: center; align-items: stretch; margin: 20px 0;
-            width: 100%;
-        }
-
-        /* Resim Alanı (Sol) */
-        .image-placeholder { 
-            flex: 1; min-height: 250px; background: #eee; 
+        .content-split { display: flex; gap: 15px; margin: 20px 0; width: 100%; }
+        .image-placeholder, .film-kesiti-placeholder { 
+            flex: 1; min-height: 180px; background: #eee; 
             border-radius: 15px; display: flex; 
             align-items: center; justify-content: center; overflow: hidden; 
             border: 1px solid #ddd;
         }
 
-        /* Film Kesiti Alanı (Sağ) */
-        .film-kesiti-placeholder {
-            flex: 1; min-height: 250px; background: #eee; 
-            border-radius: 15px; display: flex; 
-            align-items: center; justify-content: center; overflow: hidden; 
-            border: 1px solid #ddd;
-        }
-
-        #selectedWordTitle { font-size: 36px; margin: 15px 0 25px 0; text-transform: capitalize; font-weight: bold; color: var(--spotify-black); }
+        #selectedWordTitle { font-size: 32px; margin: 15px 0 20px 0; text-transform: capitalize; font-weight: bold; color: var(--spotify-black); }
         .back-btn { 
             background: #eee; color: var(--main-text); border: none; 
-            padding: 10px 20px; border-radius: 20px; cursor: pointer; 
-            position: absolute; top: 20px; left: 20px; font-weight: bold;
-            transition: background 0.2s;
-        }
-        .back-btn:hover { background: #ddd; }
-
-        /* Spotify Tarzı Müzik Çalar Tasarımı */
-        .music-player {
-            background: #f4f4f4; border-radius: 20px; padding: 20px;
-            box-shadow: inset 0 2px 10px rgba(0,0,0,0.05);
-            margin-top: 30px; width: 100%;
-            display: flex; flex-direction: column; align-items: center;
+            padding: 8px 15px; border-radius: 20px; cursor: pointer; 
+            position: absolute; top: 15px; left: 15px; font-weight: bold;
         }
 
-        .progress-container { width: 90%; height: 6px; background: #ccc; border-radius: 3px; margin: 15px 0 25px 0; position: relative; cursor: pointer; }
-        .progress-bar { width: 40%; height: 100%; background: var(--spotify-green); border-radius: 3px; position: absolute; }
-        .progress-dot { width: 14px; height: 14px; background: var(--spotify-green); border-radius: 50%; position: absolute; top: -4px; left: 40%; border: 2px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
-
-        .player-controls { display: flex; align-items: center; gap: 30px; }
-        .player-controls button { background: none; border: none; color: #666; font-size: 24px; cursor: pointer; transition: color 0.2s; }
-        .player-controls button:hover { color: var(--spotify-green); }
-        .player-controls .play-main-btn { color: white; background: var(--spotify-black); width: 60px; height: 60px; border-radius: 50%; font-size: 24px; display: flex; align-items: center; justify-content: center; transition: transform 0.2s; }
-        .player-controls .play-main-btn:hover { transform: scale(1.05); color: var(--spotify-green); }
-        .player-controls .play-main-btn span { position: relative; left: 2px; }
-
-        .player-controls .small-icon { font-size: 18px; color: #aaa; }
+        .music-player { background: #f4f4f4; border-radius: 20px; padding: 20px; margin-top: 20px; width: 100%; }
+        .progress-container { width: 100%; height: 4px; background: #ccc; border-radius: 2px; margin-bottom: 20px; position: relative; }
+        .progress-bar { width: 30%; height: 100%; background: var(--spotify-green); border-radius: 2px; }
+        .player-controls { display: flex; align-items: center; justify-content: center; gap: 20px; }
+        .player-controls button { background: none; border: none; font-size: 20px; cursor: pointer; }
+        .play-main-btn { background: var(--spotify-black) !important; color: white !important; width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
     </style>
 </head>
 <body>
@@ -116,43 +81,39 @@
 
     <div id="page-overlay">
         <div class="page-content">
-            <button class="back-btn" onclick="closePage()">⬅ Geri Dön</button>
+            <button class="back-btn" onclick="closePage()">⬅ Geri</button>
             <h1 id="selectedWordTitle">Kelime</h1>
             
             <div class="content-split">
-                <div class="image-placeholder" id="imageBox">
-                    <p style="color:var(--sub-text);">Resim Yükleniyor...</p>
-                </div>
-                <div class="film-kesiti-placeholder" id="filmBox">
-                    <p style="color:var(--sub-text);">Hoca film kesiti atcak...</p>
-                </div>
+                <div class="image-placeholder" id="imageBox">Resim</div>
+                <div class="film-kesiti-placeholder" id="filmBox">Film</div>
             </div>
 
             <div class="music-player">
-                <div class="progress-container">
-                    <div class="progress-bar"></div>
-                    <div class="progress-dot"></div>
-                </div>
-
+                <div class="progress-container"><div class="progress-bar"></div></div>
                 <div class="player-controls">
-                    <button class="small-icon">🔁</button>
-                    <button>◀️◀️</button>
-                    <button class="play-main-btn" onclick="playSound()"><span>▶</span></button>
-                    <button>▶️▶️</button>
-                    <button class="small-icon">🔀</button>
+                    <button>🔁</button>
+                    <button>◀️</button>
+                    <button class="play-main-btn" onclick="speakAgain()">▶</button>
+                    <button>▶️</button>
+                    <button>🔀</button>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        // Seslendirme Fonksiyonu
+        let currentWord = "";
+
         function speak(text) {
-            // Önceki konuşmayı durdur
             window.speechSynthesis.cancel();
             const utterance = new SpeechSynthesisUtterance(text);
             utterance.lang = 'en-US';
             window.speechSynthesis.speak(utterance);
+        }
+
+        function speakAgain() {
+            if(currentWord) speak(currentWord);
         }
 
         const wordData = [
@@ -160,30 +121,18 @@
             {en:"year", tr:"yıl", img:"https://i.ibb.co/Pz3tWTSw/MG-20260310-WA0035.jpg"},
             {en:"people", tr:"insanlar", img:"https://i.ibb.co/8g9cT4GM/MG-20260310-WA0036.jpg"},
             {en:"way", tr:"yol/yöntem", img:"https://i.ibb.co/chCL2m8m/MG-20260310-WA0037.jpg"},
-            {en:"day", tr:"gün", img:""},
             {en:"man", tr:"adam", img:"https://i.ibb.co/xtmpJsr7/MG-20260310-WA0039.jpg"},
-            {en:"thing", tr:"şey", img:""},
             {en:"woman", tr:"kadın", img:"https://i.ibb.co/PsJf2Yz3/MG-20260310-WA0041.jpg"},
-            {en:"life", tr:"hayat", img:""},
-            {en:"child", tr:"çocuk", img:""},
             {en:"world", tr:"dünya", img:"https://i.ibb.co/SDQ0HyB7/MG-20260310-WA0044.jpg"},
             {en:"school", tr:"okul", img:"https://i.ibb.co/Gf5FYC9V/MG-20260310-WA0045.jpg"},
-            {en:"state", tr:"durum/eyalet", img:""},
             {en:"family", tr:"aile", img:"https://i.ibb.co/ccK5RByF/MG-20260310-WA0047.jpg"},
-            {en:"student", tr:"öğrenci", img:""},
             {en:"group", tr:"grup", img:"https://i.ibb.co/v4MgBRDW/MG-20260310-WA0049.jpg"},
-            {en:"country", tr:"ülke", img:""},
-            {en:"problem", tr:"sorun", img:""},
             {en:"hand", tr:"el", img:"https://i.ibb.co/tTypLDS8/MG-20260310-WA0052.jpg"},
             {en:"part", tr:"parça", img:"https://i.ibb.co/VpHDnBXM/MG-20260310-WA0053.jpg"},
-            {en:"place", tr:"yer", img:""},
-            {en:"case", tr:"durum/vaka", img:""},
             {en:"week", tr:"hafta", img:"https://i.ibb.co/bjnqJxsm/MG-20260310-WA0016.jpg"},
-            {en:"company", tr:"şirket", img:""},
             {en:"system", tr:"sistem", img:"https://i.ibb.co/PZnpcBbR/MG-20260310-WA0018.jpg"},
             {en:"word", tr:"kelime", img:"https://i.ibb.co/XZv8fN24/MG-20260310-WA0019.jpg"},
             {en:"work", tr:"iş/çalışmak", img:"https://i.ibb.co/RpDT6rGL/MG-20260310-WA0020.jpg"},
-            {en:"use", tr:"kullanmak", img:""},
             {en:"make", tr:"yapmak", img:"https://i.ibb.co/m5zRnpt2/MG-20260310-WA0022.jpg"},
             {en:"take", tr:"almak", img:"https://i.ibb.co/jZr6m9M1/MG-20260310-WA0023.jpg"},
             {en:"give", tr:"vermek", img:"https://i.ibb.co/cSPcP1Yh/MG-20260310-WA0024.jpg"},
@@ -193,114 +142,41 @@
             {en:"find", tr:"bulmak", img:"https://i.ibb.co/6RY23yxs/MG-20260310-WA0028.jpg"},
             {en:"tell", tr:"anlatmak", img:"https://i.ibb.co/Lz4CFQhG/MG-20260310-WA0029.jpg"},
             {en:"ask", tr:"sormak", img:"https://i.ibb.co/bgFFWDsk/MG-20260310-WA0030.jpg"},
-            {en:"try", tr:"denemek", img:""},
-            {en:"need", tr:"ihtiyaç duymak", img:""},
             {en:"feel", tr:"hissetmek", img:"https://i.ibb.co/MkHSKKcC/MG-20260310-WA0033.jpg"},
-            {en:"become", tr:"olmak", img:""},
-            {en:"leave", tr:"ayrılmak", img:""},
-            {en:"call", tr:"aramak/çağırmak", img:"https://i.ibb.co/FkZWCBGw/MG-20260310-WA0013.jpg"},
-            {en:"keep", tr:"tutmak/saklamak", img:""},
-            {en:"start", tr:"başlamak", img:""},
-            {en:"seem", tr:"görünmek", img:""},
-            {en:"help", tr:"yardım etmek", img:"https://i.ibb.co/cKwMXMq0/MG-20260310-WA0002.jpg"},
+            {en:"call", tr:"aramak", img:"https://i.ibb.co/FkZWCBGw/MG-20260310-WA0013.jpg"},
+            {en:"help", tr:"yardım", img:"https://i.ibb.co/cKwMXMq0/MG-20260310-WA0002.jpg"},
             {en:"talk", tr:"konuşmak", img:"https://i.ibb.co/275yVhc2/MG-20260310-WA0003.jpg"},
-            {en:"turn", tr:"dönmek", img:""},
-            {en:"begin", tr:"başlamak", img:""},
-            {en:"show", tr:"göstermek", img:""},
             {en:"good", tr:"iyi", img:"https://i.ibb.co/TDsqp30R/MG-20260310-WA0005.jpg"},
-            {en:"new", tr:"yeni", img:""},
             {en:"first", tr:"birinci", img:"https://i.ibb.co/jZqJbFxd/MG-20260310-WA0006.jpg"},
-            {en:"last", tr:"son/geçen", img:"https://i.ibb.co/mCN7sY6P/MG-20260310-WA0007.jpg"},
-            {en:"long", tr:"uzun", img:""},
-            {en:"great", tr:"harika", img:""},
-            {en:"little", tr:"küçük/az", img:"https://i.ibb.co/3m1WbQh8/MG-20260310-WA0010.jpg"},
-            {en:"own", tr:"kendi", img:""},
-            {en:"other", tr:"diğer", img:""},
-            {en:"old", tr:"eski/yaşlı", img:"https://i.ibb.co/0Rk8xvZR/MG-20260310-WA0011.jpg"},
-            {en:"right", tr:"doğru/sağ", img:""},
-            {en:"big", tr:"büyük", img:""},
-            {en:"high", tr:"yüksek", img:""},
-            {en:"different", tr:"farklı", img:""},
-            {en:"small", tr:"küçük", img:""},
-            {en:"large", tr:"geniş/büyük", img:""},
-            {en:"next", tr:"sonraki", img:""},
-            {en:"early", tr:"erken", img:""},
-            {en:"young", tr:"genç", img:""},
-            {en:"important", tr:"önemli", img:""},
-            {en:"few", tr:"birkaç", img:""},
-            {en:"public", tr:"halka açık/kamu", img:""},
-            {en:"bad", tr:"kötü", img:""},
-            {en:"same", tr:"aynı", img:""},
-            {en:"able", tr:"yapabilen", img:""},
-            {en:"very", tr:"çok", img:""},
-            {en:"often", tr:"sık sık", img:""},
-            {en:"really", tr:"gerçekten", img:""},
-            {en:"quickly", tr:"hızlıca", img:""},
-            {en:"slowly", tr:"yavaşça", img:""},
-            {en:"well", tr:"iyi", img:""},
-            {en:"always", tr:"her zaman", img:""},
-            {en:"sometimes", tr:"bazen", img:""},
-            {en:"usually", tr:"genellikle", img:""},
-            {en:"together", tr:"birlikte", img:""},
-            {en:"already", tr:"zaten/çoktan", img:""},
-            {en:"almost", tr:"neredeyse", img:""},
-            {en:"especially", tr:"özellikle", img:""},
-            {en:"probably", tr:"muhtemelen", img:""},
-            {en:"finally", tr:"sonunda", img:""},
-            {en:"easily", tr:"kolayca", img:""},
-            {en:"recently", tr:"son zamanlarda", img:""},
-            {en:"immediately", tr:"hemen", img:""},
-            {en:"nearly", tr:"neredeyse", img:""},
-            {en:"currently", tr:"şu anda", img:""},
-            {en:"clearly", tr:"açıkça", img:""},
-            {en:"simply", tr:"basitçe", img:""},
-            {en:"exactly", tr:"kesinlikle", img:""},
-            {en:"strongly", tr:"güçlü bir şekilde", img:""}
+            {en:"last", tr:"son", img:"https://i.ibb.co/mCN7sY6P/MG-20260310-WA0007.jpg"},
+            {en:"little", tr:"küçük", img:"https://i.ibb.co/3m1WbQh8/MG-20260310-WA0010.jpg"},
+            {en:"old", tr:"eski", img:"https://i.ibb.co/0Rk8xvZR/MG-20260310-WA0011.jpg"}
         ];
 
         const listDiv = document.getElementById('list');
         
-        words.forEach((w, index) => {
+        wordData.forEach((item, index) => {
             let div = document.createElement('div');
             div.className = 'word-item';
-            div.innerHTML = `<span><button class="speaker-btn" onclick="event.stopPropagation(); speak('${w}')">🔊</button>${index + 1}. ${w}</span>`;
-            // Tıklandığında direkt obje gönderiliyor
-            div.onclick = () => openPage(wordData[index]);
+            div.innerHTML = `<span><button class="speaker-btn" onclick="event.stopPropagation(); speak('${item.en}')">🔊</button>${index + 1}. ${item.en}</span>`;
+            div.onclick = () => openPage(item);
             listDiv.appendChild(div);
         });
 
-        // Sayfa Açma Fonksiyonu (Animasyonlu)
         function openPage(item) {
+            currentWord = item.en;
             document.getElementById('selectedWordTitle').innerText = item.en;
-            
-            const overlay = document.getElementById('page-overlay');
-            overlay.classList.add('active'); // CSS animasyonunu tetikle
-
-            // Önceki konuşmayı durdur, yeni kelimeyi oku
+            document.getElementById('page-overlay').classList.add('active');
             speak(item.en);
 
-            // Resim Alanı
-            const imageBox = document.getElementById('imageBox');
-            if(item.img && item.img !== "") {
-                imageBox.innerHTML = `<img src="${item.img}" style="width:100%; height:100%; object-fit:contain;" alt="${item.en}">`;
-            } else {
-                imageBox.innerHTML = `<img src="https://source.unsplash.com/400x300/?${item.en}" style="width:100%; height:100%; object-fit:cover;" alt="${item.en}">`;
-            }
-
-            // Film Kesiti Alanı (İçi boş, hoca için)
-            document.getElementById('filmBox').innerHTML = `<p style="color:var(--sub-text);">Hoca buraya film kesiti (<video>) atacak.</p>`;
+            const imgUrl = item.img ? item.img : `https://source.unsplash.com/400x300/?${item.en}`;
+            document.getElementById('imageBox').innerHTML = `<img src="${imgUrl}" style="width:100%; height:100%; object-fit:contain;">`;
+            document.getElementById('filmBox').innerHTML = `<p style="color:#aaa; font-size:12px;">Hoca film atcak</p>`;
         }
 
-        // Sayfa Kapatma Fonksiyonu (Animasyonlu)
         function closePage() {
-            const overlay = document.getElementById('page-overlay');
-            overlay.classList.remove('active'); // Animasyonla küçült
-            window.speechSynthesis.cancel(); // Sayfa kapanınca sesi de durdur
-        }
-        
-        // Müzik Çalar ▶ Butonu
-        function playSound() {
-            alert("Şarkı linkleri eklendiğinde burada çalacak!");
+            document.getElementById('page-overlay').classList.remove('active');
+            window.speechSynthesis.cancel();
         }
     </script>
 </body>
