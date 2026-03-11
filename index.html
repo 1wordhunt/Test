@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kelime Projesi v3.8</title>
+    <title>Kelime Projesi v5.0 - Full Media</title>
     <style>
         :root {
             --spot-black: #121212;
@@ -14,19 +14,16 @@
 
         body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; margin: 0; padding: 20px; }
         
-        /* Liste Tasarımı */
         .list-container { max-width: 500px; margin: 0 auto; display: flex; flex-direction: column; gap: 12px; }
         .word-item { 
             background: white; padding: 18px; border-radius: 15px; cursor: pointer;
             display: flex; justify-content: space-between; align-items: center;
             box-shadow: 0 4px 10px rgba(0,0,0,0.05); transition: 0.2s;
         }
-        .word-item:active { transform: scale(0.98); }
         .word-text { font-size: 17px; font-weight: 600; flex-grow: 1; }
         .word-tr { font-size: 14px; color: #888; margin-left: 8px; font-weight: 400; }
         .listen-icon { font-size: 20px; color: var(--spot-green); padding: 5px; cursor: pointer; }
 
-        /* Overlay */
         #page-overlay { 
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
             background: var(--spot-black); z-index: 1000; justify-content: center; align-items: center;
@@ -35,7 +32,6 @@
 
         .content-container { width: 90%; max-width: 400px; display: flex; flex-direction: column; gap: 15px; }
 
-        /* Üst Bilgi */
         .word-header { color: white; text-align: center; margin-bottom: 10px; }
         .word-header h1 { margin: 0; font-size: 32px; font-weight: 800; display: inline-block; vertical-align: middle; }
         .word-header span { font-size: 18px; opacity: 0.6; margin-left: 10px; }
@@ -48,7 +44,6 @@
         }
         .media-box img { width: 100%; height: 100%; object-fit: cover; }
 
-        /* Player Kartı */
         .spotify-card { 
             background: var(--spot-grey); border-radius: 35px; padding: 30px; 
             color: white; box-shadow: 0 20px 50px rgba(0,0,0,0.5);
@@ -57,8 +52,8 @@
 
         .progress-area { width: 100%; position: relative; margin: 25px 0 15px 0; }
         .bar-bg { width: 100%; height: 4px; background: #4f4f4f; border-radius: 2px; }
-        .bar-fill { width: 55%; height: 4px; background: white; border-radius: 2px; }
-        .dot { width: 12px; height: 12px; background: white; border-radius: 50%; position: absolute; left: 55%; top: -4px; }
+        .bar-fill { width: 50%; height: 4px; background: white; border-radius: 2px; }
+        .dot { width: 12px; height: 12px; background: white; border-radius: 50%; position: absolute; left: 50%; top: -4px; }
         .plus-icon { position: absolute; right: 0; top: -35px; font-size: 24px; }
 
         .btns { display: flex; justify-content: space-between; align-items: center; }
@@ -111,54 +106,102 @@
             {en:"year", tr:"yıl", img:"https://i.ibb.co/Pz3tWTSw/MG-20260310-WA0035.jpg"},
             {en:"people", tr:"insanlar", img:"https://i.ibb.co/8g9cT4GM/MG-20260310-WA0036.jpg"},
             {en:"way", tr:"yol", img:"https://i.ibb.co/chCL2m8m/MG-20260310-WA0037.jpg"},
+            {en:"day", tr:"gün", img:""},
             {en:"man", tr:"adam", img:"https://i.ibb.co/xtmpJsr7/MG-20260310-WA0039.jpg"},
-            {en:"different", tr:"farklı", img:"https://i.ibb.co/6RY23yxs/MG-20260310-WA0028.jpg"},
-            {en:"day", tr:"gün", img:""}, {en:"thing", tr:"şey", img:""},
-            {en:"child", tr:"çocuk", img:""}, {en:"work", tr:"iş", img:""},
-            {en:"life", tr:"hayat", img:""}, {en:"woman", tr:"kadın", img:""},
-            {en:"system", tr:"sistem", img:""}, {en:"case", tr:"durum", img:""},
-            {en:"part", tr:"parça", img:""}, {en:"group", tr:"grup", img:""},
-            {en:"number", tr:"sayı", img:""}, {en:"world", tr:"dünya", img:""},
-            {en:"area", tr:"alan", img:""}, {en:"course", tr:"kurs", img:""},
-            {en:"company", tr:"şirket", img:""}, {en:"problem", tr:"sorun", img:""},
-            {en:"service", tr:"hizmet", img:""}, {en:"hand", tr:"el", img:""},
-            {en:"party", tr:"parti", img:""}, {en:"school", tr:"okul", img:""},
-            {en:"place", tr:"yer", img:""}, {en:"point", tr:"nokta", img:""},
-            {en:"period", tr:"dönem", img:""}, {en:"friend", tr:"arkadaş", img:""},
-            {en:"father", tr:"baba", img:""}, {en:"power", tr:"güç", img:""},
-            {en:"level", tr:"seviye", img:""}, {en:"council", tr:"konsey", img:""},
-            {en:"policy", tr:"politika", img:""}, {en:"process", tr:"süreç", img:""},
-            {en:"music", tr:"müzik", img:""}, {en:"market", tr:"piyasa", img:""},
-            {en:"court", tr:"mahkeme", img:""}, {en:"effect", tr:"etki", img:""},
-            {en:"staff", tr:"personel", img:""}, {en:"field", tr:"alan", img:""},
-            {en:"side", tr:"taraf", img:""}, {en:"role", tr:"rol", img:""},
-            {en:"reason", tr:"sebep", img:""}, {en:"view", tr:"görünüm", img:""},
-            {en:"moment", tr:"an", img:""}, {en:"student", tr:"öğrenci", img:""},
-            {en:"month", tr:"ay", img:""}, {en:"history", tr:"tarih", img:""},
-            {en:"future", tr:"gelecek", img:""}, {en:"change", tr:"değişim", img:""},
-            {en:"health", tr:"sağlık", img:""}, {en:"money", tr:"para", img:""},
-            {en:"team", tr:"takım", img:""}, {en:"energy", tr:"enerji", img:""},
-            {en:"quality", tr:"kalite", img:""}, {en:"support", tr:"destek", img:""},
-            {en:"standard", tr:"standart", img:""}, {en:"nature", tr:"doğa", img:""},
-            {en:"decision", tr:"karar", img:""}, {en:"success", tr:"başarı", img:""},
-            {en:"order", tr:"düzen", img:""}, {en:"theory", tr:"teori", img:""},
-            {en:"security", tr:"güvenlik", img:""}, {en:"ability", tr:"yetenek", img:""},
-            {en:"truth", tr:"gerçek", img:""}, {en:"science", tr:"bilim", img:""},
-            {en:"society", tr:"toplum", img:""}, {en:"freedom", tr:"özgürlük", img:""},
-            {en:"design", tr:"tasarım", img:""}, {en:"impact", tr:"etki", img:""},
-            {en:"justice", tr:"adalet", img:""}, {en:"law", tr:"hukuk", img:""},
-            {en:"mind", tr:"zihin", img:""}, {en:"peace", tr:"barış", img:""},
-            {en:"result", tr:"sonuç", img:""}, {en:"safety", tr:"emniyet", img:""},
-            {en:"source", tr:"kaynak", img:""}, {en:"value", tr:"değer", img:""},
-            {en:"voice", tr:"ses", img:""}, {en:"war", tr:"savaş", img:""},
-            {en:"youth", tr:"gençlik", img:""}, {en:"action", tr:"eylem", img:""},
-            {en:"dream", tr:"rüya", img:""}, {en:"book", tr:"kitap", img:""},
-            {en:"water", tr:"su", img:""}, {en:"idea", tr:"fikir", img:""},
-            {en:"door", tr:"kapı", img:""}, {en:"city", tr:"şehir", img:""},
-            {en:"night", tr:"gece", img:""}, {en:"home", tr:"ev", img:""},
-            {en:"story", tr:"hikaye", img:""}, {en:"month", tr:"ay", img:""},
-            {en:"paper", tr:"kağıt", img:""}, {en:"game", tr:"oyun", img:""},
-            {en:"heart", tr:"kalp", img:""}, {en:"sun", tr:"güneş", img:""}
+            {en:"thing", tr:"şey", img:""},
+            {en:"woman", tr:"kadın", img:"https://i.ibb.co/PsJf2Yz3/MG-20260310-WA0041.jpg"},
+            {en:"life", tr:"hayat", img:""},
+            {en:"child", tr:"çocuk", img:""},
+            {en:"world", tr:"dünya", img:"https://i.ibb.co/SDQ0HyB7/MG-20260310-WA0044.jpg"},
+            {en:"school", tr:"okul", img:"https://i.ibb.co/Gf5FYC9V/MG-20260310-WA0045.jpg"},
+            {en:"state", tr:"durum/eyalet", img:""},
+            {en:"family", tr:"aile", img:"https://i.ibb.co/ccK5RByF/MG-20260310-WA0047.jpg"},
+            {en:"student", tr:"öğrenci", img:""},
+            {en:"group", tr:"grup", img:"https://i.ibb.co/v4MgBRDW/MG-20260310-WA0049.jpg"},
+            {en:"country", tr:"ülke", img:""},
+            {en:"problem", tr:"sorun", img:""},
+            {en:"hand", tr:"el", img:"https://i.ibb.co/tTypLDS8/MG-20260310-WA0052.jpg"},
+            {en:"part", tr:"parça", img:"https://i.ibb.co/VpHDnBXM/MG-20260310-WA0053.jpg"},
+            {en:"place", tr:"yer", img:""},
+            {en:"case", tr:"durum", img:""},
+            {en:"week", tr:"hafta", img:"https://i.ibb.co/bjnqJxsm/MG-20260310-WA0016.jpg"},
+            {en:"company", tr:"şirket", img:""},
+            {en:"system", tr:"sistem", img:"https://i.ibb.co/PZnpcBbR/MG-20260310-WA0018.jpg"},
+            {en:"word", tr:"kelime", img:"https://i.ibb.co/XZv8fN24/MG-20260310-WA0019.jpg"},
+            {en:"work", tr:"iş", img:"https://i.ibb.co/RpDT6rGL/MG-20260310-WA0020.jpg"},
+            {en:"use", tr:"kullanmak", img:""},
+            {en:"make", tr:"yapmak", img:"https://i.ibb.co/m5zRnpt2/MG-20260310-WA0022.jpg"},
+            {en:"take", tr:"almak", img:"https://i.ibb.co/jZr6m9M1/MG-20260310-WA0023.jpg"},
+            {en:"give", tr:"vermek", img:"https://i.ibb.co/cSPcP1Yh/MG-20260310-WA0024.jpg"},
+            {en:"come", tr:"gelmek", img:"https://i.ibb.co/Zpx13vyb/MG-20260310-WA0025.jpg"},
+            {en:"look", tr:"bakmak", img:"https://i.ibb.co/k68RdYVh/MG-20260310-WA0026.jpg"},
+            {en:"want", tr:"istemek", img:"https://i.ibb.co/3yvVh1WR/MG-20260310-WA0027.jpg"},
+            {en:"find", tr:"bulmak", img:"https://i.ibb.co/6RY23yxs/MG-20260310-WA0028.jpg"},
+            {en:"tell", tr:"anlatmak", img:"https://i.ibb.co/Lz4CFQhG/MG-20260310-WA0029.jpg"},
+            {en:"ask", tr:"sormak", img:"https://i.ibb.co/bgFFWDsk/MG-20260310-WA0030.jpg"},
+            {en:"try", tr:"denemek", img:""},
+            {en:"need", tr:"ihtiyaç", img:""},
+            {en:"feel", tr:"hissetmek", img:"https://i.ibb.co/MkHSKKcC/MG-20260310-WA0033.jpg"},
+            {en:"become", tr:"olmak", img:""},
+            {en:"leave", tr:"ayrılmak", img:""},
+            {en:"call", tr:"aramak", img:"https://i.ibb.co/FkZWCBGw/MG-20260310-WA0013.jpg"},
+            {en:"keep", tr:"tutmak", img:""},
+            {en:"start", tr:"başlamak", img:""},
+            {en:"seem", tr:"görünmek", img:""},
+            {en:"help", tr:"yardım", img:"https://i.ibb.co/cKwMXMq0/MG-20260310-WA0002.jpg"},
+            {en:"talk", tr:"konuşmak", img:"https://i.ibb.co/275yVhc2/MG-20260310-WA0003.jpg"},
+            {en:"turn", tr:"dönmek", img:""},
+            {en:"begin", tr:"başlamak", img:""},
+            {en:"show", tr:"göstermek", img:""},
+            {en:"good", tr:"iyi", img:"https://i.ibb.co/TDsqp30R/MG-20260310-WA0005.jpg"},
+            {en:"new", tr:"yeni", img:""},
+            {en:"first", tr:"birinci", img:"https://i.ibb.co/jZqJbFxd/MG-20260310-WA0006.jpg"},
+            {en:"last", tr:"son", img:"https://i.ibb.co/mCN7sY6P/MG-20260310-WA0007.jpg"},
+            {en:"long", tr:"uzun", img:""},
+            {en:"great", tr:"harika", img:""},
+            {en:"little", tr:"küçük", img:"https://i.ibb.co/3m1WbQh8/MG-20260310-WA0010.jpg"},
+            {en:"own", tr:"kendi", img:""},
+            {en:"other", tr:"diğer", img:""},
+            {en:"old", tr:"eski", img:"https://i.ibb.co/0Rk8xvZR/MG-20260310-WA0011.jpg"},
+            {en:"right", tr:"doğru", img:""},
+            {en:"big", tr:"büyük", img:""},
+            {en:"high", tr:"yüksek", img:""},
+            {en:"different", tr:"farklı", img:""},
+            {en:"small", tr:"küçük", img:""},
+            {en:"large", tr:"geniş", img:""},
+            {en:"next", tr:"sonraki", img:""},
+            {en:"early", tr:"erken", img:""},
+            {en:"young", tr:"genç", img:""},
+            {en:"important", tr:"önemli", img:""},
+            {en:"few", tr:"az", img:""},
+            {en:"public", tr:"halka açık", img:""},
+            {en:"bad", tr:"kötü", img:""},
+            {en:"same", tr:"aynı", img:""},
+            {en:"able", tr:"yapabilen", img:""},
+            {en:"very", tr:"çok", img:""},
+            {en:"often", tr:"sık sık", img:""},
+            {en:"really", tr:"gerçekten", img:""},
+            {en:"quickly", tr:"hızlıca", img:""},
+            {en:"slowly", tr:"yavaşça", img:""},
+            {en:"well", tr:"iyi", img:""},
+            {en:"always", tr:"her zaman", img:""},
+            {en:"sometimes", tr:"bazen", img:""},
+            {en:"usually", tr:"genellikle", img:""},
+            {en:"together", tr:"birlikte", img:""},
+            {en:"already", tr:"zaten", img:""},
+            {en:"almost", tr:"neredeyse", img:""},
+            {en:"especially", tr:"özellikle", img:""},
+            {en:"probably", tr:"muhtemelen", img:""},
+            {en:"finally", tr:"sonunda", img:""},
+            {en:"easily", tr:"kolayca", img:""},
+            {en:"recently", tr:"son zamanlarda", img:""},
+            {en:"immediately", tr:"hemen", img:""},
+            {en:"nearly", tr:"neredeyse", img:""},
+            {en:"currently", tr:"şu anda", img:""},
+            {en:"clearly", tr:"açıkça", img:""},
+            {en:"simply", tr:"basitçe", img:""},
+            {en:"exactly", tr:"tam olarak", img:""},
+            {en:"strongly", tr:"güçlüce", img:""}
         ];
 
         const listDiv = document.getElementById('list');
@@ -179,9 +222,9 @@
             document.getElementById('topWord').innerText = item.en.toUpperCase();
             document.getElementById('topTr').innerText = `(${item.tr})`;
             
-            const imgUrl = item.img ? item.img : "https://via.placeholder.com/150?text=No+Image";
+            const imgUrl = item.img ? item.img : "https://via.placeholder.com/150?text=Görsel+Bekleniyor";
             document.getElementById('resimKutusu').innerHTML = `<img src="${imgUrl}">`;
-            document.getElementById('filmKutusu').innerHTML = `<p style="font-size:12px;color:#999">Hoca film atcak</p>`;
+            document.getElementById('filmKutusu').innerHTML = `<p style="font-size:12px;color:#999;text-align:center">Film Kesiti</p>`;
             
             document.getElementById('page-overlay').style.display = 'flex';
             speak(item.en);
