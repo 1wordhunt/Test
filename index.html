@@ -3,140 +3,109 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kelime Projesi v3.1</title>
+    <title>Kelime Projesi v3.2</title>
     <style>
         :root {
-            --spotify-green: #1db954;
-            --spotify-black: #191414;
-            --spotify-light-grey: #282828;
-            --bg-color: #f9f9f9;
-            --main-text: #333;
-            --sub-text: #7f8c8d;
+            --spot-red: #ff5e5e; /* Attığın görseldeki kırmızı tonu */
+            --spot-bg: #121212;
         }
 
-        body { font-family: Arial, sans-serif; background-color: var(--bg-color); margin: 0; padding: 20px; color: var(--main-text); }
-        h1 { text-align: center; color: var(--main-text); margin-bottom: 30px; }
-
-        .list-container { max-width: 600px; margin: 0 auto; display: flex; flex-direction: column; gap: 8px; }
+        body { font-family: 'Segoe UI', sans-serif; background: #f0f0f0; margin: 0; padding: 20px; }
+        
+        /* Kelime Listesi */
+        .list-container { max-width: 500px; margin: 0 auto; display: flex; flex-direction: column; gap: 10px; }
         .word-item { 
-            background: white; padding: 18px; border: 1px solid #ddd; border-radius: 8px;
-            cursor: pointer; font-size: 18px; display: flex; justify-content: space-between; align-items: center;
-            transition: all 0.3s ease;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.03);
-        }
-        .word-item:hover { background: #e0f7fa; transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.08); }
-        .word-item::after { content: "›"; font-size: 26px; color: #bbb; margin-left: 10px; }
-
-        .speaker-btn {
-            background: #3498db; color: white; border: none; border-radius: 50%;
-            width: 32px; height: 32px; margin-right: 15px; cursor: pointer;
-            font-size: 15px; line-height: 32px; text-align: center; display: inline-block;
+            background: white; padding: 20px; border-radius: 12px; cursor: pointer;
+            display: flex; justify-content: space-between; align-items: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05); font-weight: bold;
         }
 
-        /* Detay Sayfası Overlay (Büyütüldü) */
+        /* Spotify Modal Tasarımı */
         #page-overlay { 
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-            background: rgba(0,0,0,0.7); z-index: 1000; overflow-y: auto;
-            backdrop-filter: blur(5px);
-            justify-content: center; align-items: flex-start; /* Üstten başla */
-            padding-top: 20px;
+            background: rgba(0,0,0,0.8); z-index: 1000; justify-content: center; align-items: center;
+            backdrop-filter: blur(8px);
         }
 
-        /* Detay Sayfası İçeriği (Daha büyük ve uzun) */
-        .page-content { 
-            background: white; width: 95%; max-width: 700px; border-radius: 20px; 
-            padding: 25px; text-align: center;
+        .spotify-card { 
+            background: var(--spot-red); 
+            width: 90%; max-width: 400px; 
+            border-radius: 40px; 
+            padding: 30px;
             position: relative;
-            transform: scale(0.1); opacity: 0;
-            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
-            margin-bottom: 20px; /* Alttan boşluk */
+            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+            /* Görseldeki o çapraz çizgili desen */
+            background-image: 
+                linear-gradient(45deg, rgba(255,255,255,0.1) 25%, transparent 25%), 
+                linear-gradient(-45deg, rgba(255,255,255,0.1) 25%, transparent 25%), 
+                linear-gradient(45deg, transparent 75%, rgba(255,255,255,0.1) 75%), 
+                linear-gradient(-45deg, transparent 75%, rgba(255,255,255,0.1) 75%);
+            background-size: 40px 40px;
+            transform: scale(0.1); opacity: 0; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
         #page-overlay.active { display: flex; }
-        #page-overlay.active .page-content { transform: scale(1); opacity: 1; }
+        #page-overlay.active .spotify-card { transform: scale(1); opacity: 1; }
 
-        .content-split { display: flex; gap: 15px; margin: 20px 0; width: 100%; }
-        .image-placeholder, .film-kesiti-placeholder { 
-            flex: 1; min-height: 250px; /* Daha yüksek */
-            background: #eee; 
-            border-radius: 12px; display: flex; 
-            align-items: center; justify-content: center; overflow: hidden; 
-            border: 1px solid #ddd;
+        /* İçerik Kutusu (Beyaz Alan) */
+        .inner-content { 
+            background: white; border-radius: 30px; padding: 20px; 
+            margin-bottom: 25px; min-height: 300px;
         }
 
-        #selectedWordTitle { font-size: 36px; margin: 10px 0 20px 0; text-transform: capitalize; font-weight: bold; color: var(--spotify-black); }
-        
-        .back-btn-container { text-align: left; width: 100%; }
-        .back-btn { 
-            background: #eee; color: var(--main-text); border: none; 
-            padding: 8px 15px; border-radius: 20px; cursor: pointer; 
-            font-weight: bold; font-size: 14px;
-        }
+        #selectedWordTitle { font-size: 42px; margin: 10px 0; color: #333; font-weight: 900; }
 
-        /* Spotify Tarzı Müzik Çalar (Büyütüldü ve alta eklendi) */
-        .music-player { 
-            background: #fdfdfd; 
-            border-radius: 15px; 
-            padding: 25px 20px; 
-            margin-top: 25px; 
-            width: 100%; 
-            box-shadow: 0 -2px 10px rgba(0,0,0,0.03); /* Hafif üst gölge */
-            border: 1px solid #eee;
-        }
-        
-        /* Progress Bar (Spotify stili) */
-        .progress-wrapper { display: flex; align-items: center; justify-content: space-between; width: 100%; margin-bottom: 20px; font-size: 12px; color: #aaa; }
-        .progress-container { flex: 1; height: 4px; background: #ddd; border-radius: 2px; position: relative; margin: 0 10px; cursor: pointer; }
-        .progress-bar { width: 45%; height: 100%; background: var(--spotify-green); border-radius: 2px; }
-        .progress-dot { width: 12px; height: 12px; background: var(--spotify-green); border-radius: 50%; position: absolute; top: -4px; left: 45%; border: 2px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+        .media-grid { display: flex; gap: 10px; margin-top: 20px; }
+        .media-box { flex: 1; height: 150px; background: #eee; border-radius: 15px; overflow: hidden; display: flex; align-items: center; justify-content: center; font-size: 12px; color: #999; border: 1px solid #ddd; }
 
-        /* Kontroller */
-        .player-controls { display: flex; align-items: center; justify-content: center; gap: 25px; width: 100%; }
-        .player-controls button { background: none; border: none; font-size: 22px; cursor: pointer; color: #888; transition: color 0.2s; }
-        .player-controls button:hover { color: var(--spotify-green); }
-        .play-main-btn { background: var(--spotify-black) !important; color: white !important; width: 55px; height: 55px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px !important; }
-        .play-main-btn:hover { background: var(--spotify-light-grey) !important; color: var(--spotify-green) !important; }
+        /* Spotify Player Kontrolleri */
+        .player-controls-container { width: 100%; color: black; position: relative; }
         
-        /* Küçük Simgeler (İçi Boş/Sade) */
-        .control-icon-small { font-size: 18px !important; color: #bbb !important; }
-        .control-icon-small:hover { color: var(--spotify-green) !important; }
+        .progress-bar-area { width: 100%; height: 3px; background: rgba(0,0,0,0.2); border-radius: 2px; margin: 20px 0; position: relative; }
+        .progress-fill { width: 40%; height: 100%; background: black; border-radius: 2px; }
+        .progress-knob { width: 10px; height: 10px; background: black; border-radius: 50%; position: absolute; left: 40%; top: -4px; }
+
+        .main-controls { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; }
+        .control-btn { background: none; border: none; font-size: 24px; cursor: pointer; color: black; padding: 0; }
+        .play-pause-btn { background: black; color: var(--spot-red); width: 65px; height: 65px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 28px; }
+        
+        .add-btn { position: absolute; right: 0; top: -45px; font-size: 28px; font-weight: normal; cursor: pointer; }
+
+        .back-x { position: absolute; top: 15px; left: 25px; font-size: 24px; cursor: pointer; font-weight: bold; }
     </style>
 </head>
 <body>
 
-    <h1>İngilizce Kelime Listesi v3.1</h1>
+    <h1 style="text-align: center;">Kelime Listesi</h1>
     <div class="list-container" id="list"></div>
 
     <div id="page-overlay">
-        <div class="page-content">
-            <div class="back-btn-container">
-                <button class="back-btn" onclick="closePage()">⬅ Geri</button>
-            </div>
+        <div class="spotify-card">
+            <div class="back-x" onclick="closePage()">✕</div>
             
-            <h1 id="selectedWordTitle">Kelime</h1>
-            
-            <div class="content-split">
-                <div class="image-placeholder" id="imageBox">Resim Alanı</div>
-                <div class="film-kesiti-placeholder" id="filmBox">Hoca film atcak</div>
+            <div class="inner-content">
+                <h1 id="selectedWordTitle">Kelime</h1>
+                <div class="media-grid">
+                    <div class="media-box" id="imageBox">Resim</div>
+                    <div class="media-box" id="filmBox">Film Kesiti</div>
+                </div>
             </div>
 
-            <div class="music-player">
-                <div class="progress-wrapper">
-                    <span>1:23</span>
-                    <div class="progress-container">
-                        <div class="progress-bar"></div>
-                        <div class="progress-dot"></div>
-                    </div>
-                    <span>3:45</span>
-                </div>
+            <div class="player-controls-container">
+                <div class="add-btn">⊕</div>
                 
-                <div class="player-controls">
-                    <button class="control-icon-small">🔁</button>
-                    <button>◀️</button>
-                    <button class="play-main-btn" onclick="speakAgain()">▶</button>
-                    <button>▶️</button>
-                    <button class="control-icon-small">🔀</button>
+                <div class="progress-bar-area">
+                    <div class="progress-fill"></div>
+                    <div class="progress-dot"></div>
+                    <div class="progress-knob"></div>
+                </div>
+
+                <div class="main-controls">
+                    <button class="control-btn" style="font-size: 18px;">🔀</button>
+                    <button class="control-btn">⏮</button>
+                    <button class="play-pause-btn" onclick="speakAgain()">▶</button>
+                    <button class="control-btn">⏭</button>
+                    <button class="control-btn" style="font-size: 18px;">🔁</button>
                 </div>
             </div>
         </div>
@@ -144,6 +113,41 @@
 
     <script>
         let currentWord = "";
+
+        const wordData = [
+            {en:"time", img:"https://i.ibb.co/FbnR47rF/MG-20260310-WA0034.jpg"},
+            {en:"year", img:"https://i.ibb.co/Pz3tWTSw/MG-20260310-WA0035.jpg"},
+            {en:"people", img:"https://i.ibb.co/8g9cT4GM/MG-20260310-WA0036.jpg"},
+            {en:"way", img:"https://i.ibb.co/chCL2m8m/MG-20260310-WA0037.jpg"},
+            {en:"man", img:"https://i.ibb.co/xtmpJsr7/MG-20260310-WA0039.jpg"}
+            // ... Diğer kelimeleri buraya ekleyebilirsin
+        ];
+
+        const listDiv = document.getElementById('list');
+        wordData.forEach((item, index) => {
+            let div = document.createElement('div');
+            div.className = 'word-item';
+            div.innerHTML = `<span>${index + 1}. ${item.en}</span> <span>🔊</span>`;
+            div.onclick = () => openPage(item);
+            listDiv.appendChild(div);
+        });
+
+        function openPage(item) {
+            currentWord = item.en;
+            document.getElementById('selectedWordTitle').innerText = item.en;
+            document.getElementById('page-overlay').classList.add('active');
+            
+            // Resim Alanı
+            const imgBox = document.getElementById('imageBox');
+            imgBox.innerHTML = item.img ? `<img src="${item.img}" style="width:100%;height:100%;object-fit:cover;">` : "Resim Yok";
+            
+            speak(item.en);
+        }
+
+        function closePage() {
+            document.getElementById('page-overlay').classList.remove('active');
+            window.speechSynthesis.cancel();
+        }
 
         function speak(text) {
             window.speechSynthesis.cancel();
@@ -154,70 +158,6 @@
 
         function speakAgain() {
             if(currentWord) speak(currentWord);
-        }
-
-        // Kelime verileri (Değişmedi)
-        const wordData = [
-            {en:"time", tr:"zaman", img:"https://i.ibb.co/FbnR47rF/MG-20260310-WA0034.jpg"},
-            {en:"year", tr:"yıl", img:"https://i.ibb.co/Pz3tWTSw/MG-20260310-WA0035.jpg"},
-            {en:"people", tr:"insanlar", img:"https://i.ibb.co/8g9cT4GM/MG-20260310-WA0036.jpg"},
-            {en:"way", tr:"yol/yöntem", img:"https://i.ibb.co/chCL2m8m/MG-20260310-WA0037.jpg"},
-            {en:"man", tr:"adam", img:"https://i.ibb.co/xtmpJsr7/MG-20260310-WA0039.jpg"},
-            {en:"woman", tr:"kadın", img:"https://i.ibb.co/PsJf2Yz3/MG-20260310-WA0041.jpg"},
-            {en:"world", tr:"dünya", img:"https://i.ibb.co/SDQ0HyB7/MG-20260310-WA0044.jpg"},
-            {en:"school", tr:"okul", img:"https://i.ibb.co/Gf5FYC9V/MG-20260310-WA0045.jpg"},
-            {en:"family", tr:"aile", img:"https://i.ibb.co/ccK5RByF/MG-20260310-WA0047.jpg"},
-            {en:"group", tr:"grup", img:"https://i.ibb.co/v4MgBRDW/MG-20260310-WA0049.jpg"},
-            {en:"hand", tr:"el", img:"https://i.ibb.co/tTypLDS8/MG-20260310-WA0052.jpg"},
-            {en:"part", tr:"parça", img:"https://i.ibb.co/VpHDnBXM/MG-20260310-WA0053.jpg"},
-            {en:"week", tr:"hafta", img:"https://i.ibb.co/bjnqJxsm/MG-20260310-WA0016.jpg"},
-            {en:"system", tr:"sistem", img:"https://i.ibb.co/PZnpcBbR/MG-20260310-WA0018.jpg"},
-            {en:"word", tr:"kelime", img:"https://i.ibb.co/XZv8fN24/MG-20260310-WA0019.jpg"},
-            {en:"work", tr:"iş/çalışmak", img:"https://i.ibb.co/RpDT6rGL/MG-20260310-WA0020.jpg"},
-            {en:"make", tr:"yapmak", img:"https://i.ibb.co/m5zRnpt2/MG-20260310-WA0022.jpg"},
-            {en:"take", tr:"almak", img:"https://i.ibb.co/jZr6m9M1/MG-20260310-WA0023.jpg"},
-            {en:"give", tr:"vermek", img:"https://i.ibb.co/cSPcP1Yh/MG-20260310-WA0024.jpg"},
-            {en:"come", tr:"gelmek", img:"https://i.ibb.co/Zpx13vyb/MG-20260310-WA0025.jpg"},
-            {en:"look", tr:"bakmak", img:"https://i.ibb.co/k68RdYVh/MG-20260310-WA0026.jpg"},
-            {en:"want", tr:"istemek", img:"https://i.ibb.co/3yvVh1WR/MG-20260310-WA0027.jpg"},
-            {en:"find", tr:"bulmak", img:"https://i.ibb.co/6RY23yxs/MG-20260310-WA0028.jpg"},
-            {en:"tell", tr:"anlatmak", img:"https://i.ibb.co/Lz4CFQhG/MG-20260310-WA0029.jpg"},
-            {en:"ask", tr:"sormak", img:"https://i.ibb.co/bgFFWDsk/MG-20260310-WA0030.jpg"},
-            {en:"feel", tr:"hissetmek", img:"https://i.ibb.co/MkHSKKcC/MG-20260310-WA0033.jpg"},
-            {en:"call", tr:"aramak", img:"https://i.ibb.co/FkZWCBGw/MG-20260310-WA0013.jpg"},
-            {en:"help", tr:"yardım", img:"https://i.ibb.co/cKwMXMq0/MG-20260310-WA0002.jpg"},
-            {en:"talk", tr:"konuşmak", img:"https://i.ibb.co/275yVhc2/MG-20260310-WA0003.jpg"},
-            {en:"good", tr:"iyi", img:"https://i.ibb.co/TDsqp30R/MG-20260310-WA0005.jpg"},
-            {en:"first", tr:"birinci", img:"https://i.ibb.co/jZqJbFxd/MG-20260310-WA0006.jpg"},
-            {en:"last", tr:"son", img:"https://i.ibb.co/mCN7sY6P/MG-20260310-WA0007.jpg"},
-            {en:"little", tr:"küçük", img:"https://i.ibb.co/3m1WbQh8/MG-20260310-WA0010.jpg"},
-            {en:"old", tr:"eski", img:"https://i.ibb.co/0Rk8xvZR/MG-20260310-WA0011.jpg"}
-        ];
-
-        const listDiv = document.getElementById('list');
-        
-        wordData.forEach((item, index) => {
-            let div = document.createElement('div');
-            div.className = 'word-item';
-            div.innerHTML = `<span><button class="speaker-btn" onclick="event.stopPropagation(); speak('${item.en}')">🔊</button>${index + 1}. ${item.en}</span>`;
-            div.onclick = () => openPage(item);
-            listDiv.appendChild(div);
-        });
-
-        function openPage(item) {
-            currentWord = item.en;
-            document.getElementById('selectedWordTitle').innerText = item.en;
-            document.getElementById('page-overlay').classList.add('active');
-            speak(item.en);
-
-            const imgUrl = item.img ? item.img : `https://source.unsplash.com/400x300/?${item.en}`;
-            document.getElementById('imageBox').innerHTML = `<img src="${imgUrl}" style="width:100%; height:100%; object-fit:contain;">`;
-            document.getElementById('filmBox').innerHTML = `<p style="color:#aaa; font-size:12px;">Hoca film atcak</p>`;
-        }
-
-        function closePage() {
-            document.getElementById('page-overlay').classList.remove('active');
-            window.speechSynthesis.cancel();
         }
     </script>
 </body>
