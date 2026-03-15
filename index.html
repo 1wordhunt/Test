@@ -1,1 +1,110 @@
-herejj
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>3D Subway Run | Burak Developer</title>
+    <style>
+        body { margin: 0; overflow: hidden; background: #000; }
+        #ui { position: absolute; top: 20px; left: 20px; color: #0ff; font-family: sans-serif; font-size: 24px; }
+    </style>
+</head>
+<body>
+    <div id="ui">SCORE: <span id="score">0</span></div>
+
+    <script type="importmap">
+        { "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js" } }
+    </script>
+
+    <script type="module">
+        import * as THREE from 'three';
+
+        // --- KURULUM ---
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x0a0a0a);
+        scene.fog = new THREE.Fog(0x0a0a0a, 10, 30);
+
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.set(0, 3, 6); // Arkadan bakış açısı
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        // --- IŞIK ---
+        const light = new THREE.DirectionalLight(0xffffff, 1);
+        light.position.set(0, 5, 5);
+        scene.add(light);
+        scene.add(new THREE.AmbientLight(0x404040));
+
+        // --- YOL (3 Şeritli Subway Mantığı) ---
+        const roadGeo = new THREE.PlaneGeometry(12, 100);
+        const roadMat = new THREE.MeshPhongMaterial({ color: 0x222222 });
+        const road = new THREE.Mesh(roadGeo, roadMat);
+        road.rotation.x = -Math.PI / 2;
+        scene.add(road);
+
+        // --- OYUNCU (Karakter) ---
+        const playerGeo = new THREE.BoxGeometry(1, 1, 1);
+        const playerMat = new THREE.MeshPhongMaterial({ color: 0x00ff88 });
+        const player = new THREE.Mesh(playerGeo, playerMat);
+        player.position.y = 0.5;
+        scene.add(player);
+
+        // --- HAREKET DEĞİŞKENLERİ ---
+        let currentLane = 0; // -1: Sol, 0: Orta, 1: Sağ
+        const laneWidth = 3;
+        let score = 0;
+        const obstacles = [];
+
+        window.addEventListener('keydown', (e) => {
+            if (e.code === 'KeyA' || e.code === 'ArrowLeft') if (currentLane > -1) currentLane--;
+            if (e.code === 'KeyD' || e.code === 'ArrowRight') if (currentLane < 1) currentLane++;
+        });
+
+        // --- ENGEL OLUŞTURMA ---
+        function spawnObstacle() {
+            const geo = new THREE.BoxGeometry(1.5, 1.5, 1.5);
+            const mat = new THREE.MeshPhongMaterial({ color: 0xff0055 });
+            const mesh = new THREE.Mesh(geo, mat);
+            
+            const randomLane = Math.floor(Math.random() * 3) - 1;
+            mesh.position.set(randomLane * laneWidth, 0.75, -40);
+            scene.add(mesh);
+            obstacles.push(mesh);
+        }
+
+        setInterval(spawnObstacle, 1500); // Her 1.5 saniyede bir engel
+
+        // --- OYUN DÖNGÜSÜ ---
+        function animate() {
+            requestAnimationFrame(animate);
+
+            // Karakteri şeridine yumuşakça hareket ettir (Lerp)
+            player.position.x += (currentLane * laneWidth - player.position.x) * 0.1;
+
+            // Engelleri hareket ettir
+            obstacles.forEach((obj, index) => {
+                obj.position.z += 0.2; // Bize doğru geliyorlar
+
+                // Çarpışma Kontrolü
+                if (Math.abs(obj.position.z - player.position.z) < 0.8 && 
+                    Math.abs(obj.position.x - player.position.x) < 1) {
+                    score = 0; // Çarpınca skor sıfırlanır (Game Over eklenebilir)
+                    document.getElementById('score').innerText = score;
+                }
+
+                // Ekrandan çıkanları sil
+                if (obj.position.z > 10) {
+                    scene.remove(obj);
+                    obstacles.splice(index, 1);
+                    score += 10;
+                    document.getElementById('score').innerText = score;
+                }
+            });
+
+            renderer.render(scene, camera);
+        }
+        animate();
+    </script>
+</body>
+</html>
