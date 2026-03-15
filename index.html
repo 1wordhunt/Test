@@ -2,14 +2,24 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>3D Subway Run | Burak Developer</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>3D Subway Run | Burak Developer Edition</title>
     <style>
-        body { margin: 0; overflow: hidden; background: #000; }
-        #ui { position: absolute; top: 20px; left: 20px; color: #0ff; font-family: sans-serif; font-size: 24px; }
+        body { margin: 0; overflow: hidden; background: #000; touch-action: none; font-family: 'Courier New', monospace; }
+        #ui { 
+            position: absolute; top: 20px; width: 100%; text-align: center;
+            color: #0ff; font-size: 28px; font-weight: bold;
+            pointer-events: none; text-shadow: 0 0 15px #0ff;
+        }
+        #instructions {
+            position: absolute; bottom: 30px; width: 100%; text-align: center;
+            color: white; font-size: 14px; opacity: 0.7; pointer-events: none;
+        }
     </style>
 </head>
 <body>
     <div id="ui">SCORE: <span id="score">0</span></div>
+    <div id="instructions">TAP SIDES TO MOVE | CENTER TO JUMP</div>
 
     <script type="importmap">
         { "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js" } }
@@ -18,93 +28,157 @@
     <script type="module">
         import * as THREE from 'three';
 
-        // --- KURULUM ---
+        // --- TEMEL SAHNE AYARLARI ---
         const scene = new THREE.Scene();
-        scene.background = new THREE.Color(0x0a0a0a);
-        scene.fog = new THREE.Fog(0x0a0a0a, 10, 30);
+        scene.background = new THREE.Color(0x050505);
+        scene.fog = new THREE.FogExp2(0x000000, 0.06);
 
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        camera.position.set(0, 3, 6); // Arkadan bakış açısı
+        camera.position.set(0, 4, 8); // Takip açısı
 
         const renderer = new THREE.WebGLRenderer({ antialias: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(window.devicePixelRatio);
         document.body.appendChild(renderer.domElement);
 
-        // --- IŞIK ---
-        const light = new THREE.DirectionalLight(0xffffff, 1);
-        light.position.set(0, 5, 5);
-        scene.add(light);
-        scene.add(new THREE.AmbientLight(0x404040));
+        // --- IŞIKLANDIRMA ---
+        const ambient = new THREE.AmbientLight(0x404040, 2);
+        scene.add(ambient);
+        const neonLight = new THREE.PointLight(0x00ffff, 3, 50);
+        neonLight.position.set(0, 5, 5);
+        scene.add(neonLight);
 
-        // --- YOL (3 Şeritli Subway Mantığı) ---
-        const roadGeo = new THREE.PlaneGeometry(12, 100);
-        const roadMat = new THREE.MeshPhongMaterial({ color: 0x222222 });
+        // --- YOL VE ZEMİN ---
+        const roadGeo = new THREE.PlaneGeometry(12, 1000);
+        const roadMat = new THREE.MeshStandardMaterial({ color: 0x111111 });
         const road = new THREE.Mesh(roadGeo, roadMat);
         road.rotation.x = -Math.PI / 2;
         scene.add(road);
 
-        // --- OYUNCU (Karakter) ---
-        const playerGeo = new THREE.BoxGeometry(1, 1, 1);
-        const playerMat = new THREE.MeshPhongMaterial({ color: 0x00ff88 });
+        // --- OYUNCU ---
+        const playerGeo = new THREE.BoxGeometry(1.2, 1.2, 1.2);
+        const playerMat = new THREE.MeshPhongMaterial({ color: 0x00ff88, emissive: 0x00ff88, emissiveIntensity: 0.4 });
         const player = new THREE.Mesh(playerGeo, playerMat);
-        player.position.y = 0.5;
+        player.position.y = 0.6;
         scene.add(player);
 
-        // --- HAREKET DEĞİŞKENLERİ ---
-        let currentLane = 0; // -1: Sol, 0: Orta, 1: Sağ
-        const laneWidth = 3;
+        // --- DEĞİŞKENLER ---
+        let currentLane = 0; // -1, 0, 1
+        const laneWidth = 3.5;
         let score = 0;
+        let gameSpeed = 0.3;
+        let isJumping = false;
+        let jumpVelocity = 0;
         const obstacles = [];
+        const buildings = [];
 
-        window.addEventListener('keydown', (e) => {
-            if (e.code === 'KeyA' || e.code === 'ArrowLeft') if (currentLane > -1) currentLane--;
-            if (e.code === 'KeyD' || e.code === 'ArrowRight') if (currentLane < 1) currentLane++;
-        });
-
-        // --- ENGEL OLUŞTURMA ---
-        function spawnObstacle() {
-            const geo = new THREE.BoxGeometry(1.5, 1.5, 1.5);
-            const mat = new THREE.MeshPhongMaterial({ color: 0xff0055 });
-            const mesh = new THREE.Mesh(geo, mat);
+        // --- ÇEVRE ÜRETİMİ (HARİTA) ---
+        function createBuilding(z) {
+            const h = Math.random() * 15 + 5;
+            const bGeo = new THREE.BoxGeometry(3, h, 3);
+            const bMat = new THREE.MeshStandardMaterial({ color: 0x111111, emissive: 0x005555, emissiveIntensity: 0.1 });
             
-            const randomLane = Math.floor(Math.random() * 3) - 1;
-            mesh.position.set(randomLane * laneWidth, 0.75, -40);
-            scene.add(mesh);
-            obstacles.push(mesh);
+            const leftB = new THREE.Mesh(bGeo, bMat);
+            leftB.position.set(-9, h/2, z);
+            scene.add(leftB);
+            buildings.push(leftB);
+
+            const rightB = new THREE.Mesh(bGeo, bMat);
+            rightB.position.set(9, h/2, z);
+            scene.add(rightB);
+            buildings.push(rightB);
         }
 
-        setInterval(spawnObstacle, 1500); // Her 1.5 saniyede bir engel
+        for(let i=0; i<30; i++) createBuilding(-i * 12);
+
+        // --- KONTROLLER ---
+        const handleInput = (type) => {
+            if(type === 'left' && currentLane > -1) currentLane--;
+            if(type === 'right' && currentLane < 1) currentLane++;
+            if(type === 'jump' && !isJumping) { isJumping = true; jumpVelocity = 0.25; }
+        };
+
+        window.addEventListener('touchstart', (e) => {
+            const x = e.touches[0].clientX;
+            const w = window.innerWidth;
+            if (x < w/3) handleInput('left');
+            else if (x > w*2/3) handleInput('right');
+            else handleInput('jump');
+        });
+
+        window.addEventListener('keydown', (e) => {
+            if (e.code === 'ArrowLeft' || e.code === 'KeyA') handleInput('left');
+            if (e.code === 'ArrowRight' || e.code === 'KeyD') handleInput('right');
+            if (e.code === 'Space' || e.code === 'ArrowUp') handleInput('jump');
+        });
+
+        // --- ENGEL SİSTEMİ ---
+        function spawnObstacle() {
+            const h = Math.random() > 0.7 ? 2.5 : 1.2;
+            const oGeo = new THREE.BoxGeometry(1.5, h, 1.5);
+            const oMat = new THREE.MeshPhongMaterial({ color: 0xff0055, emissive: 0xff0055, emissiveIntensity: 0.5 });
+            const obs = new THREE.Mesh(oGeo, oMat);
+            const lane = Math.floor(Math.random() * 3) - 1;
+            obs.position.set(lane * laneWidth, h/2, -60);
+            scene.add(obs);
+            obstacles.push(obs);
+        }
+        setInterval(spawnObstacle, 800);
 
         // --- OYUN DÖNGÜSÜ ---
         function animate() {
             requestAnimationFrame(animate);
 
-            // Karakteri şeridine yumuşakça hareket ettir (Lerp)
-            player.position.x += (currentLane * laneWidth - player.position.x) * 0.1;
+            // Şerit Değiştirme (Smooth)
+            player.position.x += (currentLane * laneWidth - player.position.x) * 0.15;
 
-            // Engelleri hareket ettir
-            obstacles.forEach((obj, index) => {
-                obj.position.z += 0.2; // Bize doğru geliyorlar
+            // Zıplama Fiziği
+            if (isJumping) {
+                player.position.y += jumpVelocity;
+                jumpVelocity -= 0.012; // Yerçekimi
+                if (player.position.y <= 0.6) {
+                    player.position.y = 0.6;
+                    isJumping = false;
+                }
+            }
 
-                // Çarpışma Kontrolü
-                if (Math.abs(obj.position.z - player.position.z) < 0.8 && 
-                    Math.abs(obj.position.x - player.position.x) < 1) {
-                    score = 0; // Çarpınca skor sıfırlanır (Game Over eklenebilir)
-                    document.getElementById('score').innerText = score;
+            // Engellerin Hareketi ve Çarpışma
+            obstacles.forEach((obj, i) => {
+                obj.position.z += gameSpeed;
+                
+                // Gelişmiş Çarpışma
+                if (Math.abs(obj.position.z - player.position.z) < 1 && 
+                    Math.abs(obj.position.x - player.position.x) < 1.2 &&
+                    player.position.y < obj.geometry.parameters.height + 0.3) {
+                    score = 0; // Kaybettin (Skor sıfırla)
+                    gameSpeed = 0.3;
                 }
 
-                // Ekrandan çıkanları sil
-                if (obj.position.z > 10) {
+                if (obj.position.z > 15) {
                     scene.remove(obj);
-                    obstacles.splice(index, 1);
+                    obstacles.splice(i, 1);
                     score += 10;
-                    document.getElementById('score').innerText = score;
+                    gameSpeed += 0.002; // Oyun zorlaşır
                 }
             });
 
+            // Harita Döngüsü (Binalar)
+            buildings.forEach(b => {
+                b.position.z += gameSpeed;
+                if(b.position.z > 20) b.position.z = -250;
+            });
+
+            document.getElementById('score').innerText = score;
             renderer.render(scene, camera);
         }
+
         animate();
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
     </script>
 </body>
 </html>
