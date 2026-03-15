@@ -8,12 +8,13 @@
         body { margin: 0; overflow: hidden; background: #000; touch-action: none; font-family: 'Courier New', monospace; }
         #ui { 
             position: absolute; top: 20px; width: 100%; text-align: center;
-            color: #0ff; font-size: 28px; font-weight: bold;
-            pointer-events: none; text-shadow: 0 0 15px #0ff;
+            color: #0ff; font-size: 32px; font-weight: bold;
+            pointer-events: none; text-shadow: 0 0 20px #0ff;
         }
         #instructions {
             position: absolute; bottom: 30px; width: 100%; text-align: center;
-            color: white; font-size: 14px; opacity: 0.7; pointer-events: none;
+            color: #fff; font-size: 14px; opacity: 0.8; pointer-events: none;
+            text-transform: uppercase; letter-spacing: 1px;
         }
     </style>
 </head>
@@ -28,13 +29,13 @@
     <script type="module">
         import * as THREE from 'three';
 
-        // --- TEMEL SAHNE AYARLARI ---
+        // --- SAHNE VE SİS ---
         const scene = new THREE.Scene();
-        scene.background = new THREE.Color(0x050505);
-        scene.fog = new THREE.FogExp2(0x000000, 0.06);
+        scene.background = new THREE.Color(0x020205);
+        scene.fog = new THREE.FogExp2(0x020205, 0.05);
 
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        camera.position.set(0, 4, 8); // Takip açısı
+        camera.position.set(0, 4, 9); 
 
         const renderer = new THREE.WebGLRenderer({ antialias: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
@@ -42,136 +43,142 @@
         document.body.appendChild(renderer.domElement);
 
         // --- IŞIKLANDIRMA ---
-        const ambient = new THREE.AmbientLight(0x404040, 2);
+        const ambient = new THREE.AmbientLight(0x404040, 1.5);
         scene.add(ambient);
-        const neonLight = new THREE.PointLight(0x00ffff, 3, 50);
-        neonLight.position.set(0, 5, 5);
-        scene.add(neonLight);
+        const playerLight = new THREE.PointLight(0x00ff88, 2, 15);
+        scene.add(playerLight);
 
-        // --- YOL VE ZEMİN ---
+        // --- YOL VE RAYLAR ---
+        const roadGroup = new THREE.Group();
+        scene.add(roadGroup);
+
         const roadGeo = new THREE.PlaneGeometry(12, 1000);
-        const roadMat = new THREE.MeshStandardMaterial({ color: 0x111111 });
+        const roadMat = new THREE.MeshStandardMaterial({ color: 0x151515 });
         const road = new THREE.Mesh(roadGeo, roadMat);
         road.rotation.x = -Math.PI / 2;
-        scene.add(road);
+        roadGroup.add(road);
+
+        // Ray Çizgileri
+        [-3.5, 0, 3.5].forEach(x => {
+            const lineGeo = new THREE.PlaneGeometry(0.2, 1000);
+            const lineMat = new THREE.MeshBasicMaterial({ color: 0x333333 });
+            const line = new THREE.Mesh(lineGeo, lineMat);
+            line.rotation.x = -Math.PI / 2;
+            line.position.set(x, 0.01, 0);
+            roadGroup.add(line);
+        });
 
         // --- OYUNCU ---
         const playerGeo = new THREE.BoxGeometry(1.2, 1.2, 1.2);
-        const playerMat = new THREE.MeshPhongMaterial({ color: 0x00ff88, emissive: 0x00ff88, emissiveIntensity: 0.4 });
+        const playerMat = new THREE.MeshPhongMaterial({ color: 0x00ff88, emissive: 0x00ff88, emissiveIntensity: 0.5 });
         const player = new THREE.Mesh(playerGeo, playerMat);
         player.position.y = 0.6;
         scene.add(player);
 
         // --- DEĞİŞKENLER ---
-        let currentLane = 0; // -1, 0, 1
+        let currentLane = 0;
         const laneWidth = 3.5;
         let score = 0;
-        let gameSpeed = 0.3;
+        let gameSpeed = 0.4;
         let isJumping = false;
         let jumpVelocity = 0;
         const obstacles = [];
-        const buildings = [];
+        const envObjects = [];
 
-        // --- ÇEVRE ÜRETİMİ (HARİTA) ---
-        function createBuilding(z) {
-            const h = Math.random() * 15 + 5;
-            const bGeo = new THREE.BoxGeometry(3, h, 3);
-            const bMat = new THREE.MeshStandardMaterial({ color: 0x111111, emissive: 0x005555, emissiveIntensity: 0.1 });
+        // --- SAĞLAM HARİTA ÖĞELERİ (Binalar ve Lambalar) ---
+        function createEnv(z) {
+            // Binalar
+            const h = Math.random() * 20 + 10;
+            const bGeo = new THREE.BoxGeometry(4, h, 4);
+            const bMat = new THREE.MeshStandardMaterial({ color: 0x050505, emissive: 0x111111 });
             
             const leftB = new THREE.Mesh(bGeo, bMat);
-            leftB.position.set(-9, h/2, z);
+            leftB.position.set(-10, h/2, z);
             scene.add(leftB);
-            buildings.push(leftB);
+            envObjects.push(leftB);
 
             const rightB = new THREE.Mesh(bGeo, bMat);
-            rightB.position.set(9, h/2, z);
+            rightB.position.set(10, h/2, z);
             scene.add(rightB);
-            buildings.push(rightB);
+            envObjects.push(rightB);
+
+            // Sokak Lambası (Neon Direkler)
+            const pGeo = new THREE.CylinderGeometry(0.1, 0.1, 6);
+            const pMat = new THREE.MeshBasicMaterial({ color: 0x00ffff });
+            const pole = new THREE.Mesh(pGeo, pMat);
+            pole.position.set(6, 3, z);
+            scene.add(pole);
+            envObjects.push(pole);
         }
 
-        for(let i=0; i<30; i++) createBuilding(-i * 12);
+        for(let i=0; i<40; i++) createEnv(-i * 15);
 
         // --- KONTROLLER ---
-        const handleInput = (type) => {
-            if(type === 'left' && currentLane > -1) currentLane--;
-            if(type === 'right' && currentLane < 1) currentLane++;
-            if(type === 'jump' && !isJumping) { isJumping = true; jumpVelocity = 0.25; }
+        const move = (dir) => {
+            if(dir === 'L' && currentLane > -1) currentLane--;
+            if(dir === 'R' && currentLane < 1) currentLane++;
+            if(dir === 'J' && !isJumping) { isJumping = true; jumpVelocity = 0.25; }
         };
 
         window.addEventListener('touchstart', (e) => {
             const x = e.touches[0].clientX;
             const w = window.innerWidth;
-            if (x < w/3) handleInput('left');
-            else if (x > w*2/3) handleInput('right');
-            else handleInput('jump');
+            if (x < w/3) move('L');
+            else if (x > w*2/3) move('R');
+            else move('J');
         });
 
         window.addEventListener('keydown', (e) => {
-            if (e.code === 'ArrowLeft' || e.code === 'KeyA') handleInput('left');
-            if (e.code === 'ArrowRight' || e.code === 'KeyD') handleInput('right');
-            if (e.code === 'Space' || e.code === 'ArrowUp') handleInput('jump');
+            if (e.code === 'ArrowLeft' || e.code === 'KeyA') move('L');
+            if (e.code === 'ArrowRight' || e.code === 'KeyD') move('R');
+            if (e.code === 'Space' || e.code === 'ArrowUp') move('J');
         });
 
-        // --- ENGEL SİSTEMİ ---
-        function spawnObstacle() {
-            const h = Math.random() > 0.7 ? 2.5 : 1.2;
-            const oGeo = new THREE.BoxGeometry(1.5, h, 1.5);
-            const oMat = new THREE.MeshPhongMaterial({ color: 0xff0055, emissive: 0xff0055, emissiveIntensity: 0.5 });
+        // --- ENGEL SPAWN ---
+        function spawn() {
+            const type = Math.random();
+            const h = type > 0.8 ? 2.5 : 1.2;
+            const oGeo = new THREE.BoxGeometry(1.6, h, 1.6);
+            const oMat = new THREE.MeshPhongMaterial({ color: 0xff0055, emissive: 0xff0055, emissiveIntensity: 0.6 });
             const obs = new THREE.Mesh(oGeo, oMat);
-            const lane = Math.floor(Math.random() * 3) - 1;
-            obs.position.set(lane * laneWidth, h/2, -60);
+            obs.position.set((Math.floor(Math.random()*3)-1)*laneWidth, h/2, -80);
             scene.add(obs);
             obstacles.push(obs);
         }
-        setInterval(spawnObstacle, 800);
+        setInterval(spawn, 700);
 
-        // --- OYUN DÖNGÜSÜ ---
+        // --- ANİMASYON DÖNGÜSÜ ---
         function animate() {
             requestAnimationFrame(animate);
 
-            // Şerit Değiştirme (Smooth)
-            player.position.x += (currentLane * laneWidth - player.position.x) * 0.15;
+            player.position.x += (currentLane * laneWidth - player.position.x) * 0.18;
+            playerLight.position.set(player.position.x, 3, player.position.z);
 
-            // Zıplama Fiziği
             if (isJumping) {
                 player.position.y += jumpVelocity;
-                jumpVelocity -= 0.012; // Yerçekimi
-                if (player.position.y <= 0.6) {
-                    player.position.y = 0.6;
-                    isJumping = false;
-                }
+                jumpVelocity -= 0.012;
+                if (player.position.y <= 0.6) { player.position.y = 0.6; isJumping = false; }
             }
 
-            // Engellerin Hareketi ve Çarpışma
             obstacles.forEach((obj, i) => {
                 obj.position.z += gameSpeed;
-                
-                // Gelişmiş Çarpışma
-                if (Math.abs(obj.position.z - player.position.z) < 1 && 
-                    Math.abs(obj.position.x - player.position.x) < 1.2 &&
-                    player.position.y < obj.geometry.parameters.height + 0.3) {
-                    score = 0; // Kaybettin (Skor sıfırla)
-                    gameSpeed = 0.3;
+                if (obj.position.distanceTo(player.position) < 1.3) {
+                    score = 0; gameSpeed = 0.4; // Çarpma
                 }
-
-                if (obj.position.z > 15) {
-                    scene.remove(obj);
-                    obstacles.splice(i, 1);
-                    score += 10;
-                    gameSpeed += 0.002; // Oyun zorlaşır
+                if (obj.position.z > 20) {
+                    scene.remove(obj); obstacles.splice(i, 1);
+                    score += 10; gameSpeed += 0.0015;
                 }
             });
 
-            // Harita Döngüsü (Binalar)
-            buildings.forEach(b => {
-                b.position.z += gameSpeed;
-                if(b.position.z > 20) b.position.z = -250;
+            envObjects.forEach(obj => {
+                obj.position.z += gameSpeed;
+                if(obj.position.z > 30) obj.position.z = -300;
             });
 
             document.getElementById('score').innerText = score;
             renderer.render(scene, camera);
         }
-
         animate();
 
         window.addEventListener('resize', () => {
