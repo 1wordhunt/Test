@@ -3,125 +3,104 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Kafa Futbolu Mobil</title>
+    <title>Süper Futbol</title>
     <style>
-        body { margin: 0; overflow: hidden; background: #1a472a; font-family: 'Arial', sans-serif; touch-action: none; }
-        canvas { display: block; background: #2e7d32; } /* Saha Rengi */
-        #ui {
-            position: absolute; bottom: 20px; width: 100%;
-            display: flex; justify-content: center; gap: 20px;
-            pointer-events: none;
+        body { margin: 0; padding: 0; overflow: hidden; background: #2e7d32; touch-action: none; }
+        canvas { display: block; }
+        #sutBtn { 
+            position: absolute; bottom: 50px; right: 30px; 
+            width: 100px; height: 100px; border-radius: 50%; 
+            background: red; color: white; font-weight: bold;
+            display: flex; align-items: center; justify-content: center;
+            border: 5px solid white; font-size: 20px; z-index: 100;
         }
-        .btn {
-            width: 80px; height: 80px; border-radius: 50%;
-            background: rgba(0, 0, 0, 0.5); border: 3px solid #fff;
-            color: white; font-weight: bold; display: flex;
-            align-items: center; justify-content: center;
-            pointer-events: auto; user-select: none; -webkit-tap-highlight-color: transparent;
-        }
-        #sutBtn { background: #e74c3c; width: 90px; height: 90px; font-size: 20px; }
     </style>
 </head>
 <body>
+    <div id="sutBtn">ŞUT</div>
     <canvas id="gameCanvas"></canvas>
-    <div id="ui">
-        <div id="sutBtn" class="btn">ŞUT</div>
-    </div>
 
     <script>
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
         const sutBtn = document.getElementById('sutBtn');
 
+        // Ekran boyutunu ayarla
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
 
-        // Görseldeki gibi bir yapı için objeler
-        let oyuncu = { x: canvas.width/2, y: canvas.height/2, r: 30, renk: '#3498db', topBende: false };
-        let top = { x: canvas.width/2, y: canvas.height/2 - 100, r: 15, vx: 0, vy: 0 };
+        // Karakterler (Görünmesi için ekranın tam ortasına koydum)
+        let oyuncu = { x: canvas.width / 2, y: canvas.height / 2 + 100, r: 35, renk: 'blue' };
+        let top = { x: canvas.width / 2, y: canvas.height / 2, r: 15, vx: 0, vy: 0, bende: false };
 
-        // Mobil Hareket (Sürükle bırak mantığı)
+        // Mobil Kontrol
         window.addEventListener('touchmove', (e) => {
-            e.preventDefault();
             oyuncu.x = e.touches[0].clientX;
             oyuncu.y = e.touches[0].clientY;
-        }, { passive: false });
+        });
 
         // Şut Butonu
         sutBtn.addEventListener('touchstart', (e) => {
             e.preventDefault();
-            if (oyuncu.topBende) {
-                oyuncu.topBende = false;
-                top.vx = 0;
-                top.vy = -30; // Yukarı doğru sert şut
+            if (top.bende) {
+                top.bende = false;
+                top.vy = -35; // Yukarı fırlat
             }
         });
 
-        function drawField() {
-            // Saha çizgileri
-            ctx.strokeStyle = "rgba(255,255,255,0.3)";
-            ctx.lineWidth = 5;
-            ctx.strokeRect(20, 20, canvas.width - 40, canvas.height - 40);
-            // Orta saha çizgisi
-            ctx.beginPath();
-            ctx.moveTo(0, canvas.height / 2);
-            ctx.lineTo(canvas.width, canvas.height / 2);
-            ctx.stroke();
-        }
-
-        function update() {
-            // Mesafe kontrolü (Top kapma)
+        function guncelle() {
+            // Mesafe kontrolü
             let dx = top.x - oyuncu.x;
             let dy = top.y - oyuncu.y;
-            let dist = Math.sqrt(dx*dx + dy*dy);
+            let mesafe = Math.sqrt(dx*dx + dy*dy);
 
-            if (dist < oyuncu.r + top.r) {
-                oyuncu.topBende = true;
+            if (mesafe < oyuncu.r + top.r) {
+                top.bende = true;
             }
 
-            if (oyuncu.topBende) {
+            if (top.bende) {
                 top.x = oyuncu.x;
-                top.y = oyuncu.y - 40; // Topu karakterin kafasının biraz önünde tut
+                top.y = oyuncu.y - 45; // Topu oyuncunun önünde tut
+                top.vx = 0; top.vy = 0;
             } else {
                 top.x += top.vx;
                 top.y += top.vy;
-                top.vx *= 0.96; // Sürtünme
-                top.vy *= 0.96;
-
-                // Duvarlara çarpınca sekme
-                if(top.x < 0 || top.x > canvas.width) top.vx *= -1;
-                if(top.y < 0 || top.y > canvas.height) top.vy *= -1;
+                top.vx *= 0.97; top.vy *= 0.97; // Yavaşlama
             }
+
+            // Ekran dışına çıkmasınlar
+            if(top.y < 0) top.vy *= -1;
+            if(top.x < 0 || top.x > canvas.width) top.vx *= -1;
         }
 
-        function draw() {
+        function ciz() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            drawField();
 
-            // Oyuncu Çizimi (Kafa şeklinde basit daire)
+            // Sahayı çiz (Yeşil zemin üzerine çizgiler)
+            ctx.strokeStyle = "white";
+            ctx.lineWidth = 3;
+            ctx.strokeRect(10, 10, canvas.width - 20, canvas.height - 20);
+
+            // Oyuncuyu çiz (Mavi Daire)
             ctx.beginPath();
             ctx.arc(oyuncu.x, oyuncu.y, oyuncu.r, 0, Math.PI*2);
             ctx.fillStyle = oyuncu.renk;
             ctx.fill();
-            ctx.strokeStyle = "white";
             ctx.stroke();
-            ctx.closePath();
 
-            // Top Çizimi
+            // Topu çiz (Beyaz Daire)
             ctx.beginPath();
             ctx.arc(top.x, top.y, top.r, 0, Math.PI*2);
             ctx.fillStyle = "white";
             ctx.fill();
             ctx.strokeStyle = "black";
-            ctx.lineWidth = 2;
             ctx.stroke();
-            ctx.closePath();
 
-            update();
-            requestAnimationFrame(draw);
+            guncelle();
+            requestAnimationFrame(ciz);
         }
 
-        draw();
+        ciz();
     </script>
 </body>
 </html>
