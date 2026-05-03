@@ -3,104 +3,102 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Süper Futbol</title>
+    <title>Süper Futbol Mobil</title>
     <style>
-        body { margin: 0; padding: 0; overflow: hidden; background: #2e7d32; touch-action: none; }
-        canvas { display: block; }
+        body { margin: 0; padding: 0; overflow: hidden; background: #2e7d32; touch-action: none; font-family: sans-serif; }
+        
+        /* Saha Çizgisi */
+        #saha { width: 100vw; height: 100vh; position: relative; border: 5px solid rgba(255,255,255,0.3); box-sizing: border-box; }
+
+        /* Mavi Oyuncu */
+        #oyuncu { 
+            width: 60px; height: 60px; background: #3498db; 
+            border-radius: 50%; position: absolute; border: 3px solid white;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3); z-index: 10;
+        }
+
+        /* Beyaz Top */
+        #top { 
+            width: 30px; height: 30px; background: white; 
+            border-radius: 50%; position: absolute; border: 2px solid black;
+            z-index: 5; transition: top 0.1s linear, left 0.1s linear;
+        }
+
+        /* Şut Butonu */
         #sutBtn { 
-            position: absolute; bottom: 50px; right: 30px; 
+            position: absolute; bottom: 40px; right: 40px; 
             width: 100px; height: 100px; border-radius: 50%; 
-            background: red; color: white; font-weight: bold;
+            background: #e74c3c; color: white; font-weight: bold;
             display: flex; align-items: center; justify-content: center;
-            border: 5px solid white; font-size: 20px; z-index: 100;
+            border: 4px solid white; font-size: 20px; z-index: 100;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+            -webkit-tap-highlight-color: transparent;
         }
     </style>
 </head>
 <body>
+
+<div id="saha">
+    <div id="oyuncu" style="left: 150px; top: 300px;"></div>
+    <div id="top" style="left: 200px; top: 150px;"></div>
     <div id="sutBtn">ŞUT</div>
-    <canvas id="gameCanvas"></canvas>
+</div>
 
-    <script>
-        const canvas = document.getElementById('gameCanvas');
-        const ctx = canvas.getContext('2d');
-        const sutBtn = document.getElementById('sutBtn');
+<script>
+    const oyuncu = document.getElementById('oyuncu');
+    const top = document.getElementById('top');
+    const sutBtn = document.getElementById('sutBtn');
 
-        // Ekran boyutunu ayarla
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
+    let pX = 150, pY = 400; // Oyuncu pozisyon
+    let bX = 200, bY = 200; // Top pozisyon
+    let bende = false;
 
-        // Karakterler (Görünmesi için ekranın tam ortasına koydum)
-        let oyuncu = { x: canvas.width / 2, y: canvas.height / 2 + 100, r: 35, renk: 'blue' };
-        let top = { x: canvas.width / 2, y: canvas.height / 2, r: 15, vx: 0, vy: 0, bende: false };
+    // Mobil Hareket Kontrolü
+    window.addEventListener('touchmove', (e) => {
+        e.preventDefault();
+        pX = e.touches[0].clientX - 30; // Merkeze al
+        pY = e.touches[0].clientY - 30;
+        oyuncu.style.left = pX + 'px';
+        oyuncu.style.top = pY + 'px';
+        
+        kontrolEt();
+    }, { passive: false });
 
-        // Mobil Kontrol
-        window.addEventListener('touchmove', (e) => {
-            oyuncu.x = e.touches[0].clientX;
-            oyuncu.y = e.touches[0].clientY;
-        });
+    // Çarpışma ve Yapışma Kontrolü
+    function kontrolEt() {
+        let dx = (pX + 30) - (bX + 15);
+        let dy = (pY + 30) - (bY + 15);
+        let mesafe = Math.sqrt(dx*dx + dy*dy);
 
-        // Şut Butonu
-        sutBtn.addEventListener('touchstart', (e) => {
-            e.preventDefault();
-            if (top.bende) {
-                top.bende = false;
-                top.vy = -35; // Yukarı fırlat
-            }
-        });
-
-        function guncelle() {
-            // Mesafe kontrolü
-            let dx = top.x - oyuncu.x;
-            let dy = top.y - oyuncu.y;
-            let mesafe = Math.sqrt(dx*dx + dy*dy);
-
-            if (mesafe < oyuncu.r + top.r) {
-                top.bende = true;
-            }
-
-            if (top.bende) {
-                top.x = oyuncu.x;
-                top.y = oyuncu.y - 45; // Topu oyuncunun önünde tut
-                top.vx = 0; top.vy = 0;
-            } else {
-                top.x += top.vx;
-                top.y += top.vy;
-                top.vx *= 0.97; top.vy *= 0.97; // Yavaşlama
-            }
-
-            // Ekran dışına çıkmasınlar
-            if(top.y < 0) top.vy *= -1;
-            if(top.x < 0 || top.x > canvas.width) top.vx *= -1;
+        if (mesafe < 45) { // Değdiyse yapıştır
+            bende = true;
         }
 
-        function ciz() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-            // Sahayı çiz (Yeşil zemin üzerine çizgiler)
-            ctx.strokeStyle = "white";
-            ctx.lineWidth = 3;
-            ctx.strokeRect(10, 10, canvas.width - 20, canvas.height - 20);
-
-            // Oyuncuyu çiz (Mavi Daire)
-            ctx.beginPath();
-            ctx.arc(oyuncu.x, oyuncu.y, oyuncu.r, 0, Math.PI*2);
-            ctx.fillStyle = oyuncu.renk;
-            ctx.fill();
-            ctx.stroke();
-
-            // Topu çiz (Beyaz Daire)
-            ctx.beginPath();
-            ctx.arc(top.x, top.y, top.r, 0, Math.PI*2);
-            ctx.fillStyle = "white";
-            ctx.fill();
-            ctx.strokeStyle = "black";
-            ctx.stroke();
-
-            guncelle();
-            requestAnimationFrame(ciz);
+        if (bende) {
+            bX = pX + 15;
+            bY = pY - 40; // Topu oyuncunun üstünde tut
+            top.style.left = bX + 'px';
+            top.style.top = bY + 'px';
         }
+    }
 
-        ciz();
-    </script>
+    // Şut Atma
+    sutBtn.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        if (bende) {
+            bende = false;
+            // Topu ileri (yukarı) fırlat
+            bY -= 200; 
+            top.style.top = bY + 'px';
+            
+            // 1 saniye sonra topu durdur (basit simülasyon)
+            setTimeout(() => {
+                if (bY < 0) bY = 50; // Ekrandan çıkarsa geri gelsin
+                top.style.top = bY + 'px';
+            }, 300);
+        }
+    });
+</script>
+
 </body>
 </html>
